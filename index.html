@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    
+    <!-- Informações básicas -->
+    <title>InvestBet Capital - Terceirização de Trader Esportivo</title>
+    <meta name="description" content="InvestBet Capital - Plataforma de terceirização de trader esportivo profissional">
+    <meta name="keywords" content="investbet, trader esportivo, apostas, investimentos">
+    <meta name="author" content="InvestBet Capital">
+    
+    <!-- PWA - Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Ícones -->
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512x512.png">
+    
+    <!-- PWA - Theme Color -->
+    <meta name="theme-color" content="#008000">
+    <meta name="msapplication-TileColor" content="#008000">
+    <meta name="msapplication-navbutton-color" content="#008000">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- PWA - Configurações iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="InvestBet">
+    
+    <!-- PWA - Configurações Android/Chrome -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="InvestBet">
+    
+    <!-- Script de inicialização do OneSignal (Recomendado para Web Push) -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "e8446d92-93e3-420e-b77b-e8db93e19710",
+          language: 'pt-BR',
+          serviceWorkerPath: "/OneSignalSDKWorker.js",
+          allowLocalhostAsSecureOrigin: true,
+          notifyButton: {
+            enable: false,
+          },
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      // Registro do Service Worker para PWA
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+              console.log('[PWA] Service Worker registrado com sucesso:', registration.scope);
+              
+              // Verifica atualizações a cada 1 hora
+              setInterval(() => {
+                registration.update();
+              }, 3600000);
+              
+              // Listener para atualizações
+              registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    console.log('[PWA] Nova versão disponível! Recarregue a página.');
+                  }
+                });
+              });
+            })
+            .catch(error => {
+              console.error('[PWA] Falha no registro do Service Worker:', error);
+            });
+        });
+      }
+
+      // Detectar instalação do PWA
+      let deferredPrompt;
+      
+      window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('[PWA] Evento beforeinstallprompt disparado');
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Dispara evento customizado para o React capturar
+        window.dispatchEvent(new CustomEvent('pwa-install-available', { 
+          detail: { prompt: deferredPrompt } 
+        }));
+      });
+
+      window.addEventListener('appinstalled', () => {
+        console.log('[PWA] App instalado com sucesso!');
+        deferredPrompt = null;
+      });
+    </script>
+  </body>
+</html>

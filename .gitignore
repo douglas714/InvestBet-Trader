@@ -1,0 +1,16 @@
+node_modules/
+dist/
+*.zip
+*.log
+node_modules/
+dist/
+.env
+*.log
+node_modules/
+dist/
+.env
+*.log
+node_modules/
+dist/
+.env
+*.log
