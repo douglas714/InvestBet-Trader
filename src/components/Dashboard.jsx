@@ -266,7 +266,7 @@ export default function Dashboard() {
                     size="lg"
                   >
                     <ArrowUpRight className="h-4 w-4 mr-2" />
-                    Fazer Depósito
+                    Depósito
                   </Button>
                   <Button 
                     onClick={() => setActiveTab('withdraw')}
@@ -275,7 +275,7 @@ export default function Dashboard() {
                     size="lg"
                   >
                     <ArrowDownRight className="h-4 w-4 mr-2" />
-                    Solicitar Resgate de Crédito
+                    Saque
                   </Button>
                 </div>
               </CardContent>
