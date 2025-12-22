@@ -4,28 +4,35 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Button } from './ui/button';
 import { 
   requestNotificationPermission, 
-  getNotificationPermission,
-  isPushSupported 
+  isPushSupported,
+  isUserSubscribed // Importação da nova função
 } from '../services/oneSignalService';
 
 export default function NotificationSettings() {
-  const [permission, setPermission] = useState(getNotificationPermission());
+  const [isSubscribed, setIsSubscribed] = useState(null); // null = carregando, false = não inscrito, true = inscrito
   const [isSupported, setIsSupported] = useState(isPushSupported());
   const [loading, setLoading] = useState(false);
 
+  // Efeito para verificar o status da inscrição ao carregar
   useEffect(() => {
-    // Re-check permission after component mounts and OneSignal might have loaded
-    setTimeout(() => {
-      setPermission(getNotificationPermission());
+    const checkSubscription = async () => {
       setIsSupported(isPushSupported());
-    }, 1000);
+      if (isPushSupported()) {
+        const subscribed = await isUserSubscribed();
+        setIsSubscribed(subscribed);
+      } else {
+        setIsSubscribed(false); // Não suportado, então não está inscrito
+      }
+    };
+    checkSubscription();
   }, []);
 
   const handleEnableNotifications = async () => {
     setLoading(true);
     try {
+      // Esta função solicita a permissão E força o opt-in/renovação da subscription
       const granted = await requestNotificationPermission();
-      setPermission(granted);
+      setIsSubscribed(granted); // Atualiza o estado para true se concedido
       
       if (granted) {
         // Removendo o alert para uma experiência mais sofisticada
@@ -58,14 +65,28 @@ export default function NotificationSettings() {
   }
 
   // ----------------------------------------------------------------
-  // ✅ CORREÇÃO: Não renderizar nada quando ATIVADO para não atrapalhar a leitura
+  // ✅ Lógica de Visibilidade: Só renderiza se não estiver inscrito ou se estiver carregando
   // ----------------------------------------------------------------
-  if (permission === 'granted') {
-    return null; // Retorna null para não renderizar nada
+  if (isSubscribed === true) {
+    return null; // Retorna null se o usuário já estiver inscrito (botão some)
+  }
+
+  // Estado de Carregamento (Mostra um indicador enquanto verifica o status)
+  if (isSubscribed === null) {
+    return (
+      <Card className="bg-gray-50 border-gray-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-gray-500">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500"></div>
+            Verificando status de notificação...
+          </CardTitle>
+        </CardHeader>
+      </Card>
+    );
   }
   // ----------------------------------------------------------------
   
-  // Estado NÃO ATIVADO (Requer Ação) - Mantém o Card grande para incentivar a ativação
+  // Estado NÃO ATIVADO (Requer Ação) - Mostra o Card com o botão
   return (
     <Card className="transition-all bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
       <CardHeader>
