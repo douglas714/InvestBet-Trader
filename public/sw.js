@@ -1,3 +1,6 @@
+// ⚠️ IMPORTAÇÃO CRÍTICA DO ONESIGNAL - DEVE SER A PRIMEIRA LINHA
+importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js' );
+
 // Service Worker otimizado para PWA
 // Versão: 2.0
 const CACHE_NAME = 'investbet-cache-v2';
