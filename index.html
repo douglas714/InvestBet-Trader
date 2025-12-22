@@ -37,11 +37,11 @@
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
       window.OneSignalDeferred = window.OneSignalDeferred || [];
-      OneSignalDeferred.push(async function(OneSignal) {
+      OneSignalDeferred.push(async function(OneSignal ) {
         await OneSignal.init({
           appId: "e8446d92-93e3-420e-b77b-e8db93e19710",
           language: 'pt-BR',
-          serviceWorkerPath: "/OneSignalSDKWorker.js",
+          serviceWorkerPath: "/sw.js", // Aponta para o Service Worker unificado
           allowLocalhostAsSecureOrigin: true,
           notifyButton: {
             enable: false,
@@ -56,33 +56,8 @@
     
     <!-- Service Worker Registration -->
     <script>
-      // Registro do Service Worker para PWA
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then(registration => {
-              console.log('[PWA] Service Worker registrado com sucesso:', registration.scope);
-              
-              // Verifica atualizações a cada 1 hora
-              setInterval(() => {
-                registration.update();
-              }, 3600000);
-              
-              // Listener para atualizações
-              registration.addEventListener('updatefound', () => {
-                const newWorker = registration.installing;
-                newWorker.addEventListener('statechange', () => {
-                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    console.log('[PWA] Nova versão disponível! Recarregue a página.');
-                  }
-                });
-              });
-            })
-            .catch(error => {
-              console.error('[PWA] Falha no registro do Service Worker:', error);
-            });
-        });
-      }
+      // Registro do Service Worker para PWA (Movido para o OneSignal)
+
 
       // Detectar instalação do PWA
       let deferredPrompt;
