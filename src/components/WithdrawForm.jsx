@@ -4,49 +4,64 @@ import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Alert, AlertDescription } from './ui/alert'
 import { Card, CardContent } from './ui/card'
+import { useAuth } from '../hooks/useAuth'
+import { supabase } from '../lib/supabase'
 import { 
   MessageCircle, 
   Calendar, 
   Clock, 
   AlertTriangle,
   CheckCircle,
-  CreditCard // Adicionado para o ícone PIX
+  CreditCard,
+  Loader2
 } from 'lucide-react'
 
 export default function WithdrawForm() {
+  const { profile, user } = useAuth()
   const [formData, setFormData] = useState({
     fullName: '',
     cpf: '',
     amount: ''
   })
+  const [pixKey, setPixKey] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isRegisteringPix, setIsRegisteringPix] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [pixRegistered, setPixRegistered] = useState(false)
+  const [showPixInput, setShowPixInput] = useState(false)
 
   useEffect(() => {
-    // Verifica se o PIX já foi registrado no localStorage
-    const isRegistered = localStorage.getItem('investbet_pix_registered') === 'true'
-    setPixRegistered(isRegistered)
-  }, [])
+    if (profile) {
+      setFormData(prev => ({
+        ...prev,
+        fullName: profile.name || '',
+        cpf: profile.cpf || ''
+      }))
+      
+      // Verifica se o PIX já está cadastrado no perfil do Supabase
+      // O campo no banco é "CHAVE PIX" (com espaço e maiúsculo conforme a imagem)
+      // No JS o Supabase costuma retornar exatamente como está no banco
+      const hasPix = !!(profile['CHAVE PIX'] || profile.chave_pix)
+      setPixRegistered(hasPix)
+    }
+  }, [profile])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
     
-    // Formatação específica para CPF
     if (name === 'cpf') {
       const formattedCpf = value
-        .replace(/\D/g, '') // Remove tudo que não é dígito
-        .replace(/(\d{3})(\d)/, '$1.$2') // Adiciona primeiro ponto
-        .replace(/(\d{3})(\d)/, '$1.$2') // Adiciona segundo ponto
-        .replace(/(\d{3})(\d{1,2})$/, '$1-$2') // Adiciona hífen
-        .substring(0, 14) // Limita a 14 caracteres
+        .replace(/\D/g, '')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+        .substring(0, 14)
       
       setFormData(prev => ({
         ...prev,
         [name]: formattedCpf
       }))
     } else if (name === 'amount') {
-      // Formatação para valor monetário
       const numericValue = value.replace(/\D/g, '')
       const formattedValue = (numericValue / 100).toLocaleString('pt-BR', {
         minimumFractionDigits: 2,
@@ -62,6 +77,35 @@ export default function WithdrawForm() {
         ...prev,
         [name]: value
       }))
+    }
+  }
+
+  const handleRegisterPix = async () => {
+    if (!pixKey.trim()) {
+      alert('Por favor, insira uma chave PIX válida.')
+      return
+    }
+
+    setIsRegisteringPix(true)
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 'CHAVE PIX': pixKey })
+        .eq('id', user.id)
+
+      if (error) throw error
+
+      setPixRegistered(true)
+      setShowPixInput(false)
+      alert('Chave PIX cadastrada com sucesso!')
+      
+      // Recarregar a página ou atualizar o estado global seria ideal, 
+      // mas para simplicidade aqui atualizamos o estado local
+    } catch (error) {
+      console.error('Erro ao cadastrar PIX:', error)
+      alert('Erro ao cadastrar PIX. Tente novamente.')
+    } finally {
+      setIsRegisteringPix(false)
     }
   }
 
@@ -96,7 +140,6 @@ export default function WithdrawForm() {
     setIsSubmitting(true)
     
     try {
-      // Preparar dados para WhatsApp (Solicitação de Saque de Capital)
       const { fullName, cpf, amount } = formData
       const whatsappNumber = '5522997291348'
       
@@ -105,19 +148,14 @@ export default function WithdrawForm() {
       const encodedMessage = encodeURIComponent(message)
       const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`
       
-      // Abrir WhatsApp
       window.open(whatsappUrl, '_blank')
-      
-      // Mostrar mensagem de sucesso
       setShowSuccess(true)
       
-      // Limpar formulário após 3 segundos
       setTimeout(() => {
-        setFormData({
-          fullName: '',
-          cpf: '',
+        setFormData(prev => ({
+          ...prev,
           amount: ''
-        })
+        }))
         setShowSuccess(false)
       }, 3000)
       
@@ -131,7 +169,6 @@ export default function WithdrawForm() {
 
   return (
     <div className="space-y-6">
-      {/* Informações importantes sobre saque */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Alert>
           <Calendar className="h-4 w-4" />
@@ -150,46 +187,71 @@ export default function WithdrawForm() {
         </Alert>
       </div>
 
-      {/* NOVO: Cadastro PIX para Rentabilidade */}
+      {/* Cadastro PIX para Rentabilidade */}
       {!pixRegistered ? (
-        <Card className="border-2 border-green-400 bg-green-50">
+        <Card className="border border-gray-200 shadow-sm">
           <CardContent className="pt-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <CreditCard className="h-6 w-6 text-green-600" />
-              <h3 className="text-lg font-semibold text-green-700">
-                Cadastrar PIX para Recebimento de Rendimentos
-              </h3>
-            </div>
-            <p className="text-sm text-gray-700">
-              Para receber sua rentabilidade automaticamente todo dia 1° do mês, é obrigatório 
-              o cadastro da sua chave PIX. Clique no botão abaixo para ser redirecionado ao formulário de cadastro.
-            </p>
-            <a 
-              href="https://forms.gle/cCfr8k2orVucscsa6" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="block"
-              onClick={(e) => {
-                // Impede a navegação padrão do <a> para que o onClick do botão funcione corretamente\n                e.preventDefault()\n                // Abre o link do formulário em uma nova aba\n                window.open("https://forms.gle/cCfr8k2orVucscsa6", "_blank")\n                // Simula o registro após o clique
-                localStorage.setItem('investbet_pix_registered', 'true')
-                setPixRegistered(true)
-              }}
-            >
-              <Button 
-                className="w-full bg-green-600 hover:bg-green-700" 
-                size="lg"
-              >
-                <CreditCard className="h-4 w-4 mr-2" />
-                Cadastrar PIX Agora
-              </Button>
-            </a>
+            {!showPixInput ? (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="bg-green-100 p-2 rounded-full">
+                    <CreditCard className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900">
+                      Chave PIX não cadastrada
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      Necessário para receber rendimentos automáticos.
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-xs border-green-200 text-green-700 hover:bg-green-50"
+                  onClick={() => setShowPixInput(true)}
+                >
+                  Cadastrar PIX
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <Label htmlFor="pixKey" className="text-xs">Digite sua Chave PIX (CPF, Email, Celular ou Chave Aleatória)</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="pixKey"
+                    placeholder="Sua chave PIX"
+                    value={pixKey}
+                    onChange={(e) => setPixKey(e.target.value)}
+                    className="h-9 text-sm"
+                  />
+                  <Button 
+                    size="sm" 
+                    className="bg-green-600 hover:bg-green-700 h-9"
+                    onClick={handleRegisterPix}
+                    disabled={isRegisteringPix}
+                  >
+                    {isRegisteringPix ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Salvar'}
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-9 text-xs"
+                    onClick={() => setShowPixInput(false)}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       ) : (
-        <Alert className="border-green-200 bg-green-50">
-          <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-800">
-            <strong>PIX Cadastrado!</strong> Você já cadastrou sua chave PIX para o recebimento automático dos rendimentos.
+        <Alert className="border-blue-100 bg-blue-50/50">
+          <CheckCircle className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-blue-800 text-xs">
+            <strong>PIX Cadastrado!</strong> Para alterar sua chave, entre em contato com o suporte.
           </AlertDescription>
         </Alert>
       )}
@@ -267,7 +329,7 @@ export default function WithdrawForm() {
               >
                 {isSubmitting ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     Processando...
                   </>
                 ) : (
@@ -282,7 +344,6 @@ export default function WithdrawForm() {
         </CardContent>
       </Card>
 
-      {/* Informações adicionais */}
       <Alert className="border-blue-200 bg-blue-50">
         <AlertDescription className="text-blue-800">
           <strong>Informações Importantes:</strong>
