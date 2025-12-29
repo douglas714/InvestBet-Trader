@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  const signUp = async (email, password, name, phone, cpf, referralCode = null) => {
+  const signUp = async (email, password, name, phone, cpf, referralCode = null, pixKey = null) => {
     try {
       setLoading(true)
       console.log('useAuth: Tentativa de cadastro com:', email)
@@ -108,20 +108,18 @@ export const AuthProvider = ({ children }) => {
               phone: phone,
               cpf: cpf,
               balance: 0,
-              // monthly_profit: 0, // Removido: Coluna não existe na migração SQL
-              // accumulated_profit: 0, // Removido: Coluna não existe na migração SQL
               status: 'active',
               contract_accepted: false,
               Categoria: 'cliente',
               indicacao: consultantName,
               referred_by_code: cleanReferralCode,
               initial_balance: 0,
+              'CHAVE PIX': pixKey // Adicionado campo de chave PIX
             }
           ])
         
         if (profileError) {
           console.error('useAuth: Erro ao criar perfil:', profileError)
-          // Retorne o erro para o componente
           return { error: profileError }
         }
       }
@@ -206,7 +204,6 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     let mounted = true;
     
-    // Use uma função assíncrona para gerenciar a inicialização
     const handleAuth = async () => {
       console.log('useAuth: Inicializando autenticação...');
       const { data: { session } } = await supabase.auth.getSession();
@@ -229,7 +226,6 @@ export const AuthProvider = ({ children }) => {
 
     handleAuth();
 
-    // Listener para mudanças subsequentes (login, logout, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (!mounted) return;
