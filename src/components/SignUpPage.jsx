@@ -5,7 +5,7 @@ import { Input } from './ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Label } from './ui/label'
 import { Alert, AlertDescription } from './ui/alert'
-import { Loader2 } from 'lucide-react'
+import { Loader2, AlertCircle } from 'lucide-react'
 import logoImage from '../assets/logo.jpeg'
 import './AuthPage.css'
 
@@ -15,6 +15,7 @@ export default function SignUpPage({ onBackToLogin }) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [cpf, setCpf] = useState('')
+  const [pixKey, setPixKey] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -33,10 +34,12 @@ export default function SignUpPage({ onBackToLogin }) {
 
   // Função para formatar o CPF
   const formatCpf = (value) => {
-    // Remove tudo que não for dígito
     const cleanValue = value.replace(/\D/g, '')
-    // Aplica a formatação 000.000.000-00
-    const formatted = cleanValue.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
+    const formatted = cleanValue
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+      .substring(0, 14)
     return formatted
   }
 
@@ -59,18 +62,21 @@ export default function SignUpPage({ onBackToLogin }) {
       return
     }
 
-    if (!cpf.trim()) {
-      setError('CPF é obrigatório')
+    if (!cpf.trim() || cpf.length < 14) {
+      setError('CPF válido é obrigatório')
+      setIsLoading(false)
+      return
+    }
+
+    if (!pixKey.trim()) {
+      setError('Chave PIX é obrigatória para recebimento')
       setIsLoading(false)
       return
     }
 
     try {
-      // Formata o CPF para enviar para o backend sem a pontuação,
-      // pois o banco de dados geralmente armazena apenas os dígitos.
       const cleanCpf = cpf.replace(/\D/g, '')
-
-      const { error } = await signUp(email, password, name, phone, cleanCpf, referralCode)
+      const { error } = await signUp(email, password, name, phone, cleanCpf, referralCode, pixKey)
       
       if (error) {
         setError('Erro ao criar conta. Tente novamente.')
@@ -122,43 +128,60 @@ export default function SignUpPage({ onBackToLogin }) {
               />
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isLoading}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="phone">Telefone</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="(11) 99999-9999"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="phone">Telefone</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="(11) 99999-9999"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-                disabled={isLoading}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="cpf">CPF</Label>
-              <Input
-                id="cpf"
-                type="text"
-                placeholder="000.000.000-00"
-                value={cpf}
-                onChange={handleCpfChange}
-                required
-                disabled={isLoading}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="cpf">CPF</Label>
+                <Input
+                  id="cpf"
+                  type="text"
+                  placeholder="000.000.000-00"
+                  value={cpf}
+                  onChange={handleCpfChange}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="pixKey">Chave PIX para Recebimento</Label>
+                <Input
+                  id="pixKey"
+                  type="text"
+                  placeholder="CPF, Email ou Chave"
+                  value={pixKey}
+                  onChange={(e) => setPixKey(e.target.value)}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
             </div>
             
             <div className="space-y-2">
@@ -173,6 +196,15 @@ export default function SignUpPage({ onBackToLogin }) {
                 disabled={isLoading}
               />
             </div>
+
+            <Alert className="bg-blue-50 border-blue-200 py-2">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-[11px] text-blue-800 leading-tight">
+                  <strong>Confirme seus dados:</strong> Verifique se o CPF e a Chave PIX estão corretos. Eles serão usados para seus pagamentos automáticos.
+                </AlertDescription>
+              </div>
+            </Alert>
             
             {error && (
               <Alert variant="destructive">
@@ -181,14 +213,14 @@ export default function SignUpPage({ onBackToLogin }) {
             )}
 
             {success && (
-              <Alert>
-                <AlertDescription>{success}</AlertDescription>
+              <Alert className="bg-green-50 border-green-200">
+                <AlertDescription className="text-green-800">{success}</AlertDescription>
               </Alert>
             )}
 
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full bg-green-600 hover:bg-green-700" 
               disabled={isLoading}
             >
               {isLoading ? (
