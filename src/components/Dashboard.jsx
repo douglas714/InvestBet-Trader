@@ -304,13 +304,13 @@ export default function Dashboard() {
                       <span className="text-sm font-black text-slate-900">{formatCurrency(profile?.balance || 0)}</span>
                     </div>
                     
-                    <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100">
-                      <div className="flex items-center gap-2 text-amber-800 mb-1">
-                        <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
-                        <span className="text-xs font-black uppercase tracking-widest">Dica InvestBet</span>
+                    <div className="p-4 bg-green-50 rounded-2xl border border-green-100">
+                      <div className="flex items-center gap-2 text-green-800 mb-1">
+                        <TrendingUp className="h-4 w-4 text-green-600" />
+                        <span className="text-xs font-black uppercase tracking-widest">Aumente seus Lucros</span>
                       </div>
-                      <p className="text-xs text-amber-700 font-medium leading-relaxed">
-                        Mantenha seu capital investido para aproveitar os juros compostos mensais.
+                      <p className="text-xs text-green-700 font-bold leading-relaxed">
+                        Realize novos aportes para potencializar seus rendimentos e alcançar suas metas mais rápido!
                       </p>
                     </div>
                   </div>
