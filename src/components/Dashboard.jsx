@@ -78,7 +78,7 @@ export default function Dashboard() {
                 <h1 className="text-2xl font-black text-slate-900 tracking-tight">InvestBet <span className="text-green-600">Capital</span></h1>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Sistema de Gestão</p>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Gerando renda com esporte</p>
                 </div>
               </div>
             </div>
