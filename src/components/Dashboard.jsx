@@ -417,7 +417,7 @@ export default function Dashboard() {
                         <Crown className="h-5 w-5 fill-amber-400" />
                         <span className="text-xs font-black uppercase tracking-widest">Oferta de Lançamento</span>
                       </div>
-                      <h3 className="text-3xl font-black mb-2">Acesso Vitalício VIP</h3>
+                      <h3 className="text-3xl font-black mb-2">Acesso Mensal VIP</h3>
                       <p className="text-slate-400 font-medium mb-6">Entre agora e garanta sua vaga com desconto especial para investidores ativos.</p>
                       
                       <div className="flex items-baseline gap-2 mb-8">
