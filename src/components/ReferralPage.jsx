@@ -12,7 +12,8 @@ import {
   Copy,
   CheckCircle2,
   Link as LinkIcon,
-  UserPlus
+  UserPlus,
+  Image
 } from 'lucide-react'
 
 export default function ReferralPage() {
@@ -242,25 +243,35 @@ export default function ReferralPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={referralLink}
-              readOnly
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm"
-            />
-            <Button onClick={copyToClipboard} variant="outline">
-              {copied ? (
-                <>
-                  <CheckCircle2 className="h-4 w-4 mr-2 text-green-600" />
-                  Copiado!
-                </>
-              ) : (
-                <>
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copiar
-                </>
-              )}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1 flex gap-2">
+              <input
+                type="text"
+                value={referralLink}
+                readOnly
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm"
+              />
+              <Button onClick={copyToClipboard} variant="outline">
+                {copied ? (
+                  <>
+                    <CheckCircle2 className="h-4 w-4 mr-2 text-green-600" />
+                    Copiado!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copiar
+                  </>
+                )}
+              </Button>
+            </div>
+            
+            <Button 
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
+              onClick={() => window.open('https://drive.google.com/drive/folders/1uz9yzxa25zdTKTtqZGU6g9bCEsAEH082?usp=sharing', '_blank')}
+            >
+              <Image className="h-4 w-4 mr-2" />
+              Material de Apoio
             </Button>
           </div>
 
