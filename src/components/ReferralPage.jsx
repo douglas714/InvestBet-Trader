@@ -176,11 +176,25 @@ export default function ReferralPage() {
   return (
     <div className="space-y-6">
       {/* Cabeçalho */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">Sistema de Indicações</h2>
-        <p className="text-gray-600 mt-1">
-          Compartilhe seu link e ganhe 10% sobre o lucro mensal de cada cliente indicado
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Sistema de Indicações</h2>
+          <p className="text-gray-600 mt-1">
+            Compartilhe seu link e ganhe 10% sobre o lucro mensal de cada cliente indicado
+          </p>
+        </div>
+        <div className="flex flex-col items-end gap-2">
+          <Button 
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold w-full md:w-auto"
+            onClick={() => window.open('https://drive.google.com/drive/folders/1uz9yzxa25zdTKTtqZGU6g9bCEsAEH082?usp=sharing', '_blank')}
+          >
+            <Image className="h-4 w-4 mr-2" />
+            Material de Apoio
+          </Button>
+          <p className="text-xs text-gray-500 max-w-[250px] text-center md:text-right">
+            Acesse imagens e vídeos prontos para postar e divulgar seu link
+          </p>
+        </div>
       </div>
 
       {/* Cards de Estatísticas */}
@@ -243,35 +257,25 @@ export default function ReferralPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1 flex gap-2">
-              <input
-                type="text"
-                value={referralLink}
-                readOnly
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm"
-              />
-              <Button onClick={copyToClipboard} variant="outline">
-                {copied ? (
-                  <>
-                    <CheckCircle2 className="h-4 w-4 mr-2 text-green-600" />
-                    Copiado!
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copiar
-                  </>
-                )}
-              </Button>
-            </div>
-            
-            <Button 
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
-              onClick={() => window.open('https://drive.google.com/drive/folders/1uz9yzxa25zdTKTtqZGU6g9bCEsAEH082?usp=sharing', '_blank')}
-            >
-              <Image className="h-4 w-4 mr-2" />
-              Material de Apoio
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={referralLink}
+              readOnly
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm"
+            />
+            <Button onClick={copyToClipboard} variant="outline">
+              {copied ? (
+                <>
+                  <CheckCircle2 className="h-4 w-4 mr-2 text-green-600" />
+                  Copiado!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copiar
+                </>
+              )}
             </Button>
           </div>
 
