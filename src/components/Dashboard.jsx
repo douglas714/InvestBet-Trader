@@ -288,7 +288,7 @@ export default function Dashboard() {
                     <div className="w-full bg-slate-200 h-3 rounded-full overflow-hidden">
                       <div 
                         className="bg-green-500 h-full rounded-full transition-all duration-1000" 
-                        style={{ width: `${Math.min((profile?.monthly_profit || 0) * 5, 100)}%` }}
+                        style={{ width: `${Math.min((profile?.monthly_profit || 0) * 10, 100)}%` }}
                       ></div>
                     </div>
                   </div>
