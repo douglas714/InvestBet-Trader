@@ -176,23 +176,23 @@ export default function ReferralPage() {
   return (
     <div className="space-y-6">
       {/* Cabeçalho */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Sistema de Indicações</h2>
-          <p className="text-gray-600 mt-1">
-            Compartilhe seu link e ganhe 10% sobre o lucro mensal de cada cliente indicado
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+        <div className="space-y-1">
+          <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">Sistema de Indicações</h2>
+          <p className="text-gray-500 text-sm sm:text-base">
+            Compartilhe seu link e ganhe <span className="text-indigo-600 font-semibold">10% de comissão</span> sobre o lucro dos seus indicados.
           </p>
         </div>
-        <div className="flex flex-col items-end gap-2">
+        <div className="flex flex-col sm:flex-row lg:flex-col items-stretch sm:items-center lg:items-end gap-3">
           <Button 
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold w-full md:w-auto"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-6 px-8 rounded-xl shadow-lg shadow-indigo-100 transition-all active:scale-95 flex items-center justify-center text-base"
             onClick={() => window.open('https://drive.google.com/drive/folders/1uz9yzxa25zdTKTtqZGU6g9bCEsAEH082?usp=sharing', '_blank')}
           >
-            <Image className="h-4 w-4 mr-2" />
+            <Image className="h-5 w-5 mr-2" />
             Material de Apoio
           </Button>
-          <p className="text-xs text-gray-500 max-w-[250px] text-center md:text-right">
-            Acesse imagens e vídeos prontos para postar e divulgar seu link
+          <p className="text-[11px] sm:text-xs text-gray-400 font-medium text-center lg:text-right px-2">
+            Imagens e vídeos prontos para suas redes sociais
           </p>
         </div>
       </div>
