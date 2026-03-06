@@ -33,37 +33,25 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="InvestBet">
     
-    <!-- Script de inicialização do OneSignal (Recomendado para Web Push) -->
+    <!-- Script de inicialização do OneSignal SDK v16 -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
       window.OneSignalDeferred = window.OneSignalDeferred || [];
-      OneSignalDeferred.push(async function(OneSignal ) {
+      OneSignalDeferred.push(async function(OneSignal) {
         await OneSignal.init({
           appId: "e8446d92-93e3-420e-b77b-e8db93e19710",
-          language: 'pt-BR',
-          serviceWorkerPath: "/sw.js", // Aponta para o Service Worker unificado
+          // CORREÇÃO: Usar o nome padrão OneSignalSDKWorker.js na raiz
+          // O arquivo public/OneSignalSDKWorker.js foi criado para isso
+          serviceWorkerParam: { scope: "/" },
           allowLocalhostAsSecureOrigin: true,
+          // CORREÇÃO: notifyButton desativado - usamos botão customizado no Dashboard
           notifyButton: {
-            enable: true,
-            size: 'medium',
-            theme: 'default',
-            position: 'bottom-right',
-            text: {
-              'tip.unsubscribed': 'Ativar notificações',
-              'tip.subscribed': 'Você está inscrito',
-              'tip.blocked': 'Notificações bloqueadas',
-              'message.action.subscribed': 'Obrigado por se inscrever!',
-              'message.action.resubscribed': 'Você está inscrito',
-              'message.action.unsubscribed': 'Você não receberá mais notificações',
-              'dialog.main.title': 'Gerenciar Notificações',
-              'dialog.main.button.unsubscribe': 'Desativar',
-              'dialog.main.button.subscribe': 'Ativar'
-            }
+            enable: false
           },
           welcomeNotification: {
             disable: false,
             title: 'Bem-vindo(a) ao InvestBet!',
-            message: 'Obrigado por se inscrever em nossas notificações.',
+            message: 'Obrigado por ativar as notificações. Você receberá atualizações sobre seus investimentos.',
             url: 'https://investbetapp.netlify.app/'
           }
         });

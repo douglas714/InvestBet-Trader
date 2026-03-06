@@ -1,10 +1,7 @@
-// ⚠️ IMPORTAÇÃO CRÍTICA DO ONESIGNAL - DEVE SER A PRIMEIRA LINHA
-importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js' );
-
-// Service Worker otimizado para PWA
-// Versão: 2.0
-const CACHE_NAME = 'investbet-cache-v2';
-const RUNTIME_CACHE = 'investbet-runtime-v2';
+// Service Worker para PWA - InvestBet Capital
+// Versão: 3.0 - OneSignal usa OneSignalSDKWorker.js separado
+const CACHE_NAME = 'investbet-cache-v3';
+const RUNTIME_CACHE = 'investbet-runtime-v3';
 
 // Assets essenciais para cache offline
 const urlsToCache = [
@@ -18,7 +15,7 @@ const urlsToCache = [
 
 // Instalação do Service Worker
 self.addEventListener('install', (event) => {
-  console.log('[SW] Instalando Service Worker...');
+  console.log('[SW] Instalando Service Worker v3...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -37,7 +34,7 @@ self.addEventListener('install', (event) => {
 
 // Ativação do Service Worker
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Ativando Service Worker...');
+  console.log('[SW] Ativando Service Worker v3...');
   const cacheWhitelist = [CACHE_NAME, RUNTIME_CACHE];
   
   event.waitUntil(
@@ -53,7 +50,7 @@ self.addEventListener('activate', (event) => {
         );
       })
       .then(() => {
-        console.log('[SW] Service Worker ativado');
+        console.log('[SW] Service Worker v3 ativado');
         return self.clients.claim(); // Assume controle imediatamente
       })
   );
