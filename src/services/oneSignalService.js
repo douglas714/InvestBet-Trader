@@ -172,3 +172,73 @@ export const isUserSubscribed = async () => {
     return false;
   }
 };
+
+/**
+ * Força o re-registro completo da subscription push.
+ * Resolve o problema de "subscription fantasma" onde o usuário aparece como
+ * inscrito mas não recebe notificações (token desatualizado).
+ *
+ * Processo:
+ * 1. Faz opt-out da subscription atual
+ * 2. Remove todos os Service Workers registrados
+ * 3. Limpa os caches do navegador relacionados ao OneSignal
+ * 4. Faz opt-in novamente para gerar um novo token válido
+ */
+export const forceResubscribe = async () => {
+  try {
+    console.log('[OneSignal] 🔄 Iniciando re-registro forçado...');
+    const OneSignal = await getOneSignal();
+
+    // Passo 1: Opt-out da subscription atual
+    if (OneSignal.User?.PushSubscription?.optedIn) {
+      console.log('[OneSignal] Fazendo opt-out da subscription atual...');
+      await OneSignal.User.PushSubscription.optOut();
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('[OneSignal] ✅ Opt-out realizado.');
+    }
+
+    // Passo 2: Remover todos os Service Workers registrados
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      console.log('[OneSignal] Removendo', registrations.length, 'Service Worker(s)...');
+      for (const registration of registrations) {
+        await registration.unregister();
+        console.log('[OneSignal] SW removido:', registration.scope);
+      }
+    }
+
+    // Passo 3: Limpar caches do navegador
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      console.log('[OneSignal] Limpando', cacheNames.length, 'cache(s)...');
+      for (const cacheName of cacheNames) {
+        await caches.delete(cacheName);
+        console.log('[OneSignal] Cache removido:', cacheName);
+      }
+    }
+
+    // Passo 4: Aguardar para garantir limpeza completa
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    // Passo 5: Fazer novo opt-in
+    console.log('[OneSignal] Realizando novo opt-in...');
+    await OneSignal.User.PushSubscription.optIn();
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    const sub = OneSignal.User.PushSubscription;
+    console.log('[OneSignal] ✅ Re-registro concluído!');
+    console.log('[OneSignal] Novo Subscription ID:', sub?.id);
+    console.log('[OneSignal] OptedIn:', sub?.optedIn);
+
+    // Adicionar tag de re-registro
+    await OneSignal.User.addTags({
+      notification_enabled: 'true',
+      resubscribed_at: new Date().toISOString()
+    });
+
+    return { success: true, subscriptionId: sub?.id };
+  } catch (error) {
+    console.error('[OneSignal] Erro no re-registro:', error);
+    return { success: false, error: error.message };
+  }
+};

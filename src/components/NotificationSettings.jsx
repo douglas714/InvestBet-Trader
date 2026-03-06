@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
-import { Bell, BellOff, CheckCircle, X } from "lucide-react";
+import { Bell, BellOff, CheckCircle, X, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import {
   requestNotificationPermission,
-  isUserSubscribed
+  isUserSubscribed,
+  forceResubscribe
 } from "../services/oneSignalService";
 
 export default function NotificationSettings() {
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [resubLoading, setResubLoading] = useState(false);
+  const [resubMessage, setResubMessage] = useState(null);
 
   useEffect(() => {
     const checkStatus = async () => {
@@ -18,6 +21,7 @@ export default function NotificationSettings() {
         "serviceWorker" in navigator &&
         "PushManager" in window;
 
+      if (!pushSupported) { setStatus("unsupported"); return; }
       if (Notification.permission === "denied") { setStatus("denied"); return; }
 
       try {
@@ -44,6 +48,24 @@ export default function NotificationSettings() {
       setStatus("default");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForceResubscribe = async () => {
+    setResubLoading(true);
+    setResubMessage(null);
+    try {
+      const result = await forceResubscribe();
+      if (result.success) {
+              setResubMessage({ type: "success", text: "Pronto! Notificações re-registradas com sucesso." });
+        setStatus("subscribed");
+      } else {
+              setResubMessage({ type: "error", text: "Erro ao re-registrar. Tente recarregar a página." });
+      }
+    } catch (error) {
+      setResubMessage({ type: "error", text: "Erro inesperado. Tente novamente." });
+    } finally {
+      setResubLoading(false);
     }
   };
 
@@ -88,6 +110,26 @@ export default function NotificationSettings() {
             Você receberá alertas em tempo real sobre seus investimentos e lucros.
           </CardDescription>
         </CardHeader>
+        <CardContent className="pt-0">
+          {resubMessage && (
+            <div className={`mb-2 px-3 py-2 rounded text-xs font-medium ${
+              resubMessage.type === "success"
+                ? "bg-green-100 text-green-700 border border-green-200"
+                : "bg-red-100 text-red-700 border border-red-200"
+            }`}>
+              {resubMessage.text}
+            </div>
+          )}
+          <button
+            onClick={handleForceResubscribe}
+            disabled={resubLoading}
+            title="Clique aqui se as notificações não estiverem chegando"
+            className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors mt-1 disabled:opacity-50 cursor-pointer"
+          >
+            <RefreshCw className={`h-3 w-3 ${resubLoading ? "animate-spin" : ""}`} />
+            {resubLoading ? "Atualizando registro..." : "Notificações não chegando? Clique para corrigir"}
+          </button>
+        </CardContent>
       </Card>
     );
   }
