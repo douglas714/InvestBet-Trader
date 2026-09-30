@@ -7,10 +7,18 @@ import logoImage from '../assets/logo.jpeg'
 
 export default function ContractPage({ onAccept }) {
   const [accepted, setAccepted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState(null)
 
-  const handleAccept = () => {
+  const handleAccept = async () => {
     if (accepted) {
-      onAccept()
+      setSubmitting(true)
+      setError(null)
+      const result = await onAccept()
+      if (result?.error) {
+        setError('Não foi possível registrar o aceite. Tente novamente.')
+      }
+      setSubmitting(false)
     }
   }
 
@@ -225,13 +233,15 @@ export default function ContractPage({ onAccept }) {
           
           <Button 
             onClick={handleAccept}
-            disabled={!accepted}
+            disabled={!accepted || submitting}
             className="w-full"
           >
-            Aceitar e Continuar
+            {submitting ? 'Registrando aceite...' : 'Aceitar e Continuar'}
           </Button>
+          {error && <p className="text-sm text-red-700 text-center">{error}</p>}
         </CardContent>
       </Card>
     </div>
   )
 }
+
